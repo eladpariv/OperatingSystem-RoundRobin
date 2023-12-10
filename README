@@ -1,0 +1,37 @@
+Introduction
+In this assignment, we have created a static library that creates and manages user-level threads.
+A potential user will be able to include your library and use it according to its public interface: the uthreads.h header file.
+Your task is to implement all the functions that make up the uthreads API according to their documentation. You will probably find it necessary to implement internal functions and data structures. These should not be visible outside the library, as they are the private part of your implementation. You are not restricted in their number, signatures, or content. You are required to write clear, readable and efficient code.
+Remark: read the exercise description, the code examples and the man pages thoroughly; they will help clarify things.
+Remark: the “clear and readable” code requirement is for you, not for us.
+The Threads
+Initially, a program is comprised of the default main thread, whose ID is 0. All other threads will be explicitly created. Each existing thread has a unique thread ID, which is a non-negative integer. The ID given to a new thread must be the smallest non-negative integer not already taken by an existing thread (i.e. if a thread with ID 1 is terminated and then a new thread is spawned, it should receive 1 as its ID). The maximal number of threads the library should support (including the main thread) is MAX_THREAD_NUM.
+Thread State Diagram
+At any given time during the running of the user's program, each thread in the program is in one of the states shown in the following state diagram. Transitions from state to state occur as a result of calling one of the library functions, or from elapsing of time, as explained below.
+
+Scheduler
+In order to manage the threads in your library, you will need some sort of scheduling. Your scheduler will implement the Round-Robin (RR) scheduling algorithm.
+States
+Each thread can be in one of the following states: RUNNING, BLOCKED, or READY.
+Time
+The process running time is measured by the Virtual Timer.
+An example of using this timer can be found in the additional resources in the file “demo_itimer.c”.
+Note: unless stated otherwise, whenever we mention time in this exercise, we mean the running time of the process (also called the virtual time) and not the real time that has passed in the system.
+Algorithm
+The Round-Robin scheduling policy should work as follows:
+
+1. Whenever a thread is moved to the RUNNING state, it is allocated a predefined number
+   of microseconds to run. This time interval is called a quantum.
+2. The RUNNING thread is preempted if any of the following occurs:
+   a) Its quantum expires.
+   b) It changed its state to BLOCKED and is consequently waiting for an event (i.e.
+   some other thread that will resume it or after some time has passed – more
+   details below).
+   c) It is terminated.
+3. When the RUNNING thread is preempted, do the following:
+4. If it was preempted because its quantum has expired, move it to the end of the
+   READY threads list.
+5. Move the next thread in the queue of READY threads to the RUNNING state.
+6. Every time a thread moves to the READY state from any other state, it is placed at the end of the list of READY threads.
+7. When a thread doesn't finish its quantum (as in the case of a thread that blocks itself), the next thread should start executing immediately as if the previous thread finished its quota.
+   In the following illustration, the quantum was set for 2 seconds, Thread 1 blocks itself after running only for 1 second and Thread 2 immediately starts its next quantum
